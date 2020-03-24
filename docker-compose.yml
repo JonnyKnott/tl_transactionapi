@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+  webapi:
+    build:
+      context: ./
+      dockerfile: src/TrueLayer.TransactionData.WebApi/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - 9001:80
+    restart: always
