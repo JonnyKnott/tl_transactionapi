@@ -7,6 +7,12 @@ services:
       dockerfile: src/TrueLayer.TransactionData.WebApi/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - Connections__RedisEndpoint=redis_image:6379/
     ports:
       - 9001:80
     restart: always
+  redis_image:
+    image: redis
+    container_name: cache
+    ports:
+      - "6379:6379"

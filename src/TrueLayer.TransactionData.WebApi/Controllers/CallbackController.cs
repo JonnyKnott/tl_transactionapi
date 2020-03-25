@@ -18,7 +18,7 @@ namespace TrueLayer.TransactionData.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Post([FromQuery]CallbackRequest request)
+        public async Task<IActionResult> Get([FromQuery]CallbackRequest request)
         {
             var result = await _service.Process(request);
 
