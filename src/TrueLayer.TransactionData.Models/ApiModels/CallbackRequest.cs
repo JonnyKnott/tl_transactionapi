@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
 using TrueLayer.TransactionData.Models.Enums;
 
 namespace TrueLayer.TransactionData.Models.ApiModels

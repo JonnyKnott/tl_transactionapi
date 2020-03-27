@@ -8,19 +8,30 @@ namespace TrueLayer.TransactionData.Services.Data.Extensions
 {
     public static class DistributedCacheExtensions
     {
-        public static async Task SetValueObject(this IDistributedCache cache, string key, object value)
+        public static async Task SetValueObject(this IDistributedCache cache, string key, object value, TimeSpan lifespan = default)
         {
-            await cache.SetAsync(key, value is string s ? 
-                EncodeObject(s) : 
-                EncodeObject(JsonConvert.SerializeObject(value)));
+            if (lifespan == default)
+            {
+                await cache.SetAsync(key,
+                    value is string s ? EncodeObject(s) : EncodeObject(JsonConvert.SerializeObject(value)));
+            }
+            else
+            {
+                await cache.SetAsync(key,
+                    value is string s ? EncodeObject(s) : EncodeObject(JsonConvert.SerializeObject(value)),
+                    new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = lifespan
+                    });
+            }
+
+            ;
         }
 
         public static async Task<TObjectType> Get<TObjectType>(this IDistributedCache cache, string key)
         where TObjectType: class, new()
         {
-            try
-            {
-                var cachedItemBytes = await cache.GetAsync(key);
+            var cachedItemBytes = await cache.GetAsync(key);
 
                 if (cachedItemBytes == null)
                     return null;
@@ -31,13 +42,6 @@ namespace TrueLayer.TransactionData.Services.Data.Extensions
                     return value as TObjectType;
 
                 return JsonConvert.DeserializeObject<TObjectType>(value);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
-                throw ex;
-            }
         }
         
         

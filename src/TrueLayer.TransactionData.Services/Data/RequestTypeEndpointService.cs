@@ -19,7 +19,8 @@ namespace TrueLayer.TransactionData.Services.Data
             { RequestType.GetAccounts,  _trueLayerConfiguration.GetAccountsEndpoint},
             { RequestType.GetTransactions, _trueLayerConfiguration.GetTransactionsEndpoint},
             { RequestType.ExchangeCode, _trueLayerConfiguration.AuthEndpoint},
-            { RequestType.RefreshAccess, _trueLayerConfiguration.AuthEndpoint}
+            { RequestType.RefreshAccess, _trueLayerConfiguration.AuthEndpoint},
+            { RequestType.AccessTokenMetadata, _trueLayerConfiguration.AccessTokenMetadataEndpoint}
         }.ToImmutableDictionary();
 
         public string GetEndpoint(RequestType requestType)

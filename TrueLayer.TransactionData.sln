@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueLayer.TransactionData.W
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueLayer.TransactionData.Models", "src\TrueLayer.TransactionData.Models\TrueLayer.TransactionData.Models.csproj", "{34614BC6-4FF5-48D3-AA36-EAD027F6161A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueLayer.TransactionData.Services.Test", "test\TrueLayer.TransactionData.Services.Test\TrueLayer.TransactionData.Services.Test.csproj", "{68C80679-3DE6-4997-8A2D-1AB188179424}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,11 +45,16 @@ Global
 		{34614BC6-4FF5-48D3-AA36-EAD027F6161A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34614BC6-4FF5-48D3-AA36-EAD027F6161A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34614BC6-4FF5-48D3-AA36-EAD027F6161A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68C80679-3DE6-4997-8A2D-1AB188179424}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68C80679-3DE6-4997-8A2D-1AB188179424}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68C80679-3DE6-4997-8A2D-1AB188179424}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68C80679-3DE6-4997-8A2D-1AB188179424}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{98B61550-A9D0-4E8E-9787-F4181A507BB8} = {CB8E7061-130A-43ED-AD55-A659694C6D72}
 		{EA5EAFDD-7E04-42FB-9FC4-1961B82A964E} = {CB8E7061-130A-43ED-AD55-A659694C6D72}
 		{7B41950C-2073-40B6-A1A8-90CC8A74B676} = {9F6459A1-3871-4D2E-9AF4-6C13D39E2E86}
 		{34614BC6-4FF5-48D3-AA36-EAD027F6161A} = {CB8E7061-130A-43ED-AD55-A659694C6D72}
+		{68C80679-3DE6-4997-8A2D-1AB188179424} = {9F6459A1-3871-4D2E-9AF4-6C13D39E2E86}
 	EndGlobalSection
 EndGlobal

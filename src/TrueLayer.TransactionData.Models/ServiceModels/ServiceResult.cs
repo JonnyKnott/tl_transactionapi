@@ -5,7 +5,7 @@ namespace TrueLayer.TransactionData.Models.ServiceModels
 {
     public class ServiceObjectResult<TResultType> : ServiceResult
     {
-        protected ServiceObjectResult(TResultType result) : base()
+        protected ServiceObjectResult(TResultType result)
         {
             Result = result;
         }

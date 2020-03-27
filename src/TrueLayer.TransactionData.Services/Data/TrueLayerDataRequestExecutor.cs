@@ -40,18 +40,96 @@ namespace TrueLayer.TransactionData.Services.Data
             return requestMessage;
         }
 
-        public async Task<ServiceObjectResult<ICollection<Account>>> GetAccounts(string accessToken)
+        public async Task<ServiceObjectResult<TrueLayerListResponse<Account>>> GetAccounts(string accessToken)
         {
             var client = CreateClient();
 
             var request =
                 BuildDataRequest(
-                    $"{client.BaseAddress}/{_requestTypeEndpointService.GetEndpoint(RequestType.GetAccounts)}",
+                    $"{client.BaseAddress}{_requestTypeEndpointService.GetEndpoint(RequestType.GetAccounts)}",
                     accessToken, HttpMethod.Get);
 
             using (var response = await client.SendAsync(request))
             {
-                return await ProcessResponse<ICollection<Account>>(response, RequestType.GetAccounts, request.RequestUri.ToString());
+                return await ProcessResponse<TrueLayerListResponse<Account>>(response, RequestType.GetAccounts, request.RequestUri.ToString());
+            }
+        }
+
+        public async Task<ServiceObjectResult<TrueLayerListResponse<Transaction>>> GetTransactions(string accessToken, string accountId)
+        {
+            var client = _clientFactory.CreateClient(HttpClients.TrueLayerDataClientName);
+
+            var endpoint = _requestTypeEndpointService.GetEndpoint(RequestType.GetTransactions)
+                .Replace($"{{{_configuration.AccountIdPlaceholder}}}", accountId);
+
+            var request = BuildDataRequest(
+                $"{client.BaseAddress}{endpoint}",
+                accessToken, HttpMethod.Get
+            );
+            
+            using (var response = await client.SendAsync(request))
+            {
+                return await ProcessResponse<TrueLayerListResponse<Transaction>>(response, RequestType.GetTransactions, request.RequestUri.ToString());
+            }
+        }
+
+        public async Task<ServiceObjectResult<AuthResponse>> RefreshAccountAccess(AccountAccessContext accountContext)
+        {
+            var client = _clientFactory.CreateClient(HttpClients.TrueLayerAuthClientName);
+
+            var formContent = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("grant_type", "refresh_token"),
+                new KeyValuePair<string, string>("client_id", _configuration.ClientId),
+                new KeyValuePair<string, string>("client_secret", _configuration.ClientSecret),
+                new KeyValuePair<string, string>("refresh_token", accountContext.RefreshToken)
+            });
+
+            var requestEndpoint = _requestTypeEndpointService.GetEndpoint(RequestType.RefreshAccess);
+
+            using (var response =
+                await client.PostAsync(requestEndpoint, formContent))
+            {
+                return await ProcessResponse<AuthResponse>(response, RequestType.RefreshAccess,
+                    $"{client.BaseAddress}{requestEndpoint}");
+            }
+        }
+
+        public async Task<ServiceObjectResult<AuthResponse>> ExchangeCode(AccountAccessContext accountContext)
+        {
+            var client = _clientFactory.CreateClient(HttpClients.TrueLayerAuthClientName);
+            
+            var formContent = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("grant_type", "authorization_code"),
+                new KeyValuePair<string, string>("client_id", _configuration.ClientId),
+                new KeyValuePair<string, string>("client_secret", _configuration.ClientSecret),
+                new KeyValuePair<string, string>("redirect_uri", $"http://localhost:5000/api/v1/callback/{accountContext.UserId}"),
+                new KeyValuePair<string, string>("code", accountContext.Code)
+            });
+            
+            var requestEndpoint = _requestTypeEndpointService.GetEndpoint(RequestType.ExchangeCode);
+
+            using (var response =
+                await client.PostAsync(requestEndpoint, formContent))
+            {
+                return await ProcessResponse<AuthResponse>(response, RequestType.ExchangeCode,
+                    $"{client.BaseAddress}{requestEndpoint}");
+            }
+        }
+
+        public async Task<ServiceObjectResult<TrueLayerListResponse<AccessTokenMetadata>>> GetAccessTokenMetadata(string accessToken)
+        {
+            var client = _clientFactory.CreateClient(HttpClients.TrueLayerDataClientName);
+            
+            var request =
+                BuildDataRequest(
+                    $"{client.BaseAddress}{_requestTypeEndpointService.GetEndpoint(RequestType.AccessTokenMetadata)}",
+                    accessToken, HttpMethod.Get);
+
+            using (var response = await client.SendAsync(request))
+            {
+                return await ProcessResponse<TrueLayerListResponse<AccessTokenMetadata>>(response, RequestType.AccessTokenMetadata, request.RequestUri.ToString());
             }
         }
 
@@ -66,7 +144,7 @@ namespace TrueLayer.TransactionData.Services.Data
                 
             return ServiceObjectResult<TResultType>.Succeeded(result);
         }
-
+        
         private ICollection<string> GenerateErrorsForUnsuccessfulRequest(HttpResponseMessage response, RequestType requestType, string requestUri)
         {
             switch (response.StatusCode)
@@ -91,56 +169,6 @@ namespace TrueLayer.TransactionData.Services.Data
                     {
                         $"An unrecognised error occurred returning response code {response.StatusCode} - RequestUri: {requestUri}"
                     };
-            }
-        }
-
-        public Task<ServiceObjectResult<ICollection<Transaction>>> GetTransactions(string accessToken, string accountId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<ServiceObjectResult<AuthResponse>> RefreshAccountAccess(AccountAccessContext accountContext)
-        {
-            var client = _clientFactory.CreateClient(HttpClients.TrueLayerAuthClientName);
-
-            var formContent = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
-            {
-                new KeyValuePair<string, string>("grant_type", "refresh_token"),
-                new KeyValuePair<string, string>("client_id", _configuration.ClientId),
-                new KeyValuePair<string, string>("client_secret", _configuration.ClientSecret),
-                new KeyValuePair<string, string>("refresh_token", accountContext.RefreshToken)
-            });
-
-            var requestEndpoint = _requestTypeEndpointService.GetEndpoint(RequestType.RefreshAccess);
-
-            using (var response =
-                await client.PostAsync(requestEndpoint, formContent))
-            {
-                return await ProcessResponse<AuthResponse>(response, RequestType.RefreshAccess,
-                    $"{client.BaseAddress}/{requestEndpoint}");
-            }
-        }
-
-        public async Task<ServiceObjectResult<AuthResponse>> ExchangeCode(AccountAccessContext accountContext)
-        {
-            var client = _clientFactory.CreateClient(HttpClients.TrueLayerAuthClientName);
-            
-            var formContent = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
-            {
-                new KeyValuePair<string, string>("grant_type", "authorization_code"),
-                new KeyValuePair<string, string>("client_id", _configuration.ClientId),
-                new KeyValuePair<string, string>("client_secret", _configuration.ClientSecret),
-                new KeyValuePair<string, string>("redirect_uri", "http://localhost:5000/api/v1/callback"),
-                new KeyValuePair<string, string>("code", accountContext.Code)
-            });
-            
-            var requestEndpoint = _requestTypeEndpointService.GetEndpoint(RequestType.ExchangeCode);
-
-            using (var response =
-                await client.PostAsync(requestEndpoint, formContent))
-            {
-                return await ProcessResponse<AuthResponse>(response, RequestType.ExchangeCode,
-                    $"{client.BaseAddress}/{requestEndpoint}");
             }
         }
     }

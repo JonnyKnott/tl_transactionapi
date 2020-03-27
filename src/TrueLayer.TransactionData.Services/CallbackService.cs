@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Distributed;
 using TrueLayer.TransactionData.Models.ApiModels;
 using TrueLayer.TransactionData.Models.ServiceModels;
 using TrueLayer.TransactionData.Services.Auth;
@@ -9,31 +8,34 @@ namespace TrueLayer.TransactionData.Services
 {
     public class CallbackService : ICallbackService
     {
-        private readonly IAccountContextCachingService _accountContextCachingService;
         private readonly IAuthorizationService _authorizationService;
+        private readonly IUserDataCachingService _userDataCachingService;
 
-        public CallbackService(IAccountContextCachingService accountContextCachingService, IAuthorizationService authorizationService)
+        public CallbackService(IAuthorizationService authorizationService, IUserDataCachingService userDataCachingService)
         {
-            _accountContextCachingService = accountContextCachingService;
             _authorizationService = authorizationService;
+            _userDataCachingService = userDataCachingService;
         }
         
-        public async Task<ServiceResult> Process(CallbackRequest callbackData)
+        public async Task<ServiceResult> Process(string userId, CallbackRequest callbackData)
         {
+            await _userDataCachingService.ClearUserData(userId);
+            
             if (!string.IsNullOrEmpty(callbackData.Error))
                 return ServiceResult.Failed(new[] {ErrorMessages.CallbackStatedAccessDenied});
 
             var accountContext = new AccountAccessContext
             {
+                UserId = userId,
                 Code = callbackData.Code,
                 Scopes = callbackData.GetScopes()
             };
 
             var exchangeCodeResult = await _authorizationService.ExchangeCode(accountContext);
             
-            var cacheResult =
-                _accountContextCachingService.CacheNewAccountContext(callbackData.Code, callbackData.GetScopes());
-            
+            if(!exchangeCodeResult.Success)
+                return ServiceResult.Failed(exchangeCodeResult.Errors);
+
             return ServiceResult.Succeeded();
         }
     }

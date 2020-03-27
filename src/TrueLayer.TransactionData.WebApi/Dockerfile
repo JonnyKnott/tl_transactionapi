@@ -7,6 +7,7 @@ COPY src/TrueLayer.TransactionData.WebApi/TrueLayer.TransactionData.WebApi.cspro
 COPY src/TrueLayer.TransactionData.Services/TrueLayer.TransactionData.Services.csproj src/TrueLayer.TransactionData.Services/
 COPY src/TrueLayer.TransactionData.Models/TrueLayer.TransactionData.Models.csproj src/TrueLayer.TransactionData.Models/
 COPY test/TrueLayer.TransactionData.WebApi.Integration.Test/TrueLayer.TransactionData.WebApi.Integration.Test.csproj test/TrueLayer.TransactionData.WebApi.Integration.Test/
+COPY test/TrueLayer.TransactionData.Services.Test/TrueLayer.TransactionData.Services.Test.csproj test/TrueLayer.TransactionData.Services.Test/
 RUN dotnet restore
 
 WORKDIR /src

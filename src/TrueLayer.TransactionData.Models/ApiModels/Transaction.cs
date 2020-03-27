@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 using TrueLayer.TransactionData.Models.Enums;
 
@@ -31,7 +30,7 @@ namespace TrueLayer.TransactionData.Models.ApiModels
         [JsonProperty("transaction_id")] 
         public string TransactionId { get; set; }
 
-        [JsonProperty("timestamp")] 
+        [JsonProperty("meta")] 
         public TransactionMetadata TransactionMetadata { get; set; }
     }
 }

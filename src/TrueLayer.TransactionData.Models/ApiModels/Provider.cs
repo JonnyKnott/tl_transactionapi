@@ -1,9 +1,8 @@
-﻿using System.Text.Json.Serialization;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace TrueLayer.TransactionData.Models.ApiModels
 {
-    public class AccountProvider
+    public class Provider
     {
         [JsonProperty("display_name")] 
         public string DisplayName { get; set; }

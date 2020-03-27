@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 
 namespace TrueLayer.TransactionData.Models.ApiModels
@@ -22,6 +21,6 @@ namespace TrueLayer.TransactionData.Models.ApiModels
         
         [JsonProperty("account_number")] 
         public AccountNumber AccountNumber { get; set; }
-        public AccountProvider Provider { get; set; }
+        public Provider Provider { get; set; }
     }
 }

@@ -7,6 +7,6 @@ namespace TrueLayer.TransactionData.Services
 {
     public interface IAccountService
     {
-        Task<ServiceObjectResult<ICollection<Account>>> GetAccountsInCurrentContext();
+        Task<ServiceObjectResult<ICollection<Account>>> GetAccountsInContext(AccountAccessContext accessContext);
     }
 }

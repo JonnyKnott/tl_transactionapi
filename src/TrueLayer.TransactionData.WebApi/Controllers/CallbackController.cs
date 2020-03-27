@@ -1,6 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using TrueLayer.TransactionData.Models.ApiModels;
 using TrueLayer.TransactionData.Services;
 
@@ -11,16 +12,20 @@ namespace TrueLayer.TransactionData.WebApi.Controllers
     public class CallbackController : ControllerBase
     {
         private readonly ICallbackService _service;
+        private readonly ILogger<CallbackController> _logger;
 
-        public CallbackController(ICallbackService service)
+        public CallbackController(ICallbackService service, ILogger<CallbackController> logger)
         {
             _service = service;
+            _logger = logger;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Get([FromQuery]CallbackRequest request)
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> Get(string userId, [FromQuery]CallbackRequest request)
         {
-            var result = await _service.Process(request);
+            _logger.LogInformation($"Processing new account access for user {userId}");
+            
+            var result = await _service.Process(userId, request);
 
             if (!result.Success)
             {

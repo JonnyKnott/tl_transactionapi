@@ -4,6 +4,7 @@
     {
         ExchangeCode,
         RefreshAccess,
+        AccessTokenMetadata,
         GetAccounts,
         GetTransactions
     }

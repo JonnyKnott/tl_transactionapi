@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
@@ -11,9 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
-using StackExchange.Redis;
-using TrueLayer.TransactionData.Models;
-using TrueLayer.TransactionData.Models.ApiModels;
+using Microsoft.Extensions.Logging;
 using TrueLayer.TransactionData.Models.Configurations;
 using TrueLayer.TransactionData.Models.ServiceModels;
 using TrueLayer.TransactionData.Services;
@@ -41,12 +38,13 @@ namespace TrueLayer.TransactionData.WebApi
             
             services
                 .AddScoped<ICallbackService, CallbackService>()
-                .AddScoped<IAccountContextCachingService, AccountContextCachingService>()
+                .AddSingleton<IAccessContextCachingService, AccessContextCachingService>()
                 .AddScoped<ITransactionService, TransactionService>()
                 .AddScoped<IAccountService, AccountService>()
                 .AddScoped<IAuthorizationService, AuthorizationService>()
                 .AddScoped<ITrueLayerDataRequestExecutor, TrueLayerDataRequestExecutor>()
-                .AddScoped<IRequestTypeEndpointService, RequestTypeEndpointService>()
+                .AddSingleton<IRequestTypeEndpointService, RequestTypeEndpointService>()
+                .AddSingleton<IUserDataCachingService, UserDataCachingService>()
                 .AddSingleton(trueLayerConfiguration);
 
             services
@@ -63,7 +61,15 @@ namespace TrueLayer.TransactionData.WebApi
             {
                 options.DefaultApiVersion = new ApiVersion(1, 0);
             });
+            
+            services.AddMvc().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                options.JsonSerializerOptions.IgnoreNullValues = true;
+            });
 
+            services.AddLogging(builder => { builder.AddConsole(); });
+            
             services.AddDistributedRedisCache(options =>
                 {
                     options.Configuration = connectionConfiguration.RedisEndpoint;
