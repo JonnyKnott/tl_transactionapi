@@ -7,20 +7,20 @@ namespace TrueLayer.TransactionData.Services.Data
 {
     public class RequestTypeEndpointService : IRequestTypeEndpointService
     {
-        private readonly TrueLayerConfiguration _trueLayerConfiguration;
+        private readonly TrueLayerEndpointConfiguration _trueLayerRequestConfiguration;
 
-        public RequestTypeEndpointService(TrueLayerConfiguration trueLayerConfiguration)
+        public RequestTypeEndpointService(TrueLayerEndpointConfiguration trueLayerRequestConfiguration)
         {
-            _trueLayerConfiguration = trueLayerConfiguration;
+            _trueLayerRequestConfiguration = trueLayerRequestConfiguration;
         }
 
         public IImmutableDictionary<RequestType, string> RequestEndpoints => new Dictionary<RequestType, string>
         {
-            { RequestType.GetAccounts,  _trueLayerConfiguration.GetAccountsEndpoint},
-            { RequestType.GetTransactions, _trueLayerConfiguration.GetTransactionsEndpoint},
-            { RequestType.ExchangeCode, _trueLayerConfiguration.AuthEndpoint},
-            { RequestType.RefreshAccess, _trueLayerConfiguration.AuthEndpoint},
-            { RequestType.AccessTokenMetadata, _trueLayerConfiguration.AccessTokenMetadataEndpoint}
+            { RequestType.GetAccounts,  _trueLayerRequestConfiguration.GetAccountsEndpoint},
+            { RequestType.GetTransactions, _trueLayerRequestConfiguration.GetTransactionsEndpoint},
+            { RequestType.ExchangeCode, _trueLayerRequestConfiguration.AuthEndpoint},
+            { RequestType.RefreshAccess, _trueLayerRequestConfiguration.AuthEndpoint},
+            { RequestType.AccessTokenMetadata, _trueLayerRequestConfiguration.AccessTokenMetadataEndpoint}
         }.ToImmutableDictionary();
 
         public string GetEndpoint(RequestType requestType)

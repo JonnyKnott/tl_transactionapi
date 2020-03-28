@@ -16,13 +16,13 @@ namespace TrueLayer.TransactionData.Services.Data
     {
         private readonly IHttpClientFactory _clientFactory;
         private readonly IRequestTypeEndpointService _requestTypeEndpointService;
-        private readonly TrueLayerConfiguration _configuration;
+        private readonly TrueLayerRequestConfiguration _requestConfiguration;
 
-        public TrueLayerDataRequestExecutor(IHttpClientFactory clientFactory, IRequestTypeEndpointService requestTypeEndpointService, TrueLayerConfiguration configuration)
+        public TrueLayerDataRequestExecutor(IHttpClientFactory clientFactory, IRequestTypeEndpointService requestTypeEndpointService, TrueLayerRequestConfiguration requestConfiguration)
         {
             _clientFactory = clientFactory;
             _requestTypeEndpointService = requestTypeEndpointService;
-            _configuration = configuration;
+            _requestConfiguration = requestConfiguration;
         }
 
         private HttpClient CreateClient()
@@ -60,7 +60,7 @@ namespace TrueLayer.TransactionData.Services.Data
             var client = _clientFactory.CreateClient(HttpClients.TrueLayerDataClientName);
 
             var endpoint = _requestTypeEndpointService.GetEndpoint(RequestType.GetTransactions)
-                .Replace($"{{{_configuration.AccountIdPlaceholder}}}", accountId);
+                .Replace($"{_requestConfiguration.AccountIdPlaceholder}", accountId);
 
             var request = BuildDataRequest(
                 $"{client.BaseAddress}{endpoint}",
@@ -80,8 +80,8 @@ namespace TrueLayer.TransactionData.Services.Data
             var formContent = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
             {
                 new KeyValuePair<string, string>("grant_type", "refresh_token"),
-                new KeyValuePair<string, string>("client_id", _configuration.ClientId),
-                new KeyValuePair<string, string>("client_secret", _configuration.ClientSecret),
+                new KeyValuePair<string, string>("client_id", _requestConfiguration.ClientId),
+                new KeyValuePair<string, string>("client_secret", _requestConfiguration.ClientSecret),
                 new KeyValuePair<string, string>("refresh_token", accountContext.RefreshToken)
             });
 
@@ -102,9 +102,9 @@ namespace TrueLayer.TransactionData.Services.Data
             var formContent = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
             {
                 new KeyValuePair<string, string>("grant_type", "authorization_code"),
-                new KeyValuePair<string, string>("client_id", _configuration.ClientId),
-                new KeyValuePair<string, string>("client_secret", _configuration.ClientSecret),
-                new KeyValuePair<string, string>("redirect_uri", $"http://localhost:5000/api/v1/callback/{accountContext.UserId}"),
+                new KeyValuePair<string, string>("client_id", _requestConfiguration.ClientId),
+                new KeyValuePair<string, string>("client_secret", _requestConfiguration.ClientSecret),
+                new KeyValuePair<string, string>("redirect_uri", $"{_requestConfiguration.CallbackUrlBase}{accountContext.UserId}"),
                 new KeyValuePair<string, string>("code", accountContext.Code)
             });
             
@@ -138,7 +138,7 @@ namespace TrueLayer.TransactionData.Services.Data
             var responseContent = await response.Content.ReadAsStringAsync();
             
             if(!response.IsSuccessStatusCode)
-                return ServiceObjectResult<TResultType>.Failed(default(TResultType), GenerateErrorsForUnsuccessfulRequest(response, requestType, requestUri));
+                return ServiceObjectResult<TResultType>.Failed(default, GenerateErrorsForUnsuccessfulRequest(response, requestType, requestUri));
 
             var result = JsonConvert.DeserializeObject<TResultType>(responseContent);
                 

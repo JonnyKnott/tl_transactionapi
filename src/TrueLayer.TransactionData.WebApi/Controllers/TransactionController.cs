@@ -39,6 +39,14 @@ namespace TrueLayer.TransactionData.WebApi.Controllers
 
         }
 
+        [HttpGet("{userId}/Summary")]
+        public async Task<IActionResult> GetSummary(string userId, [FromQuery] bool detailed = false)
+        {
+            var transactionResult = await _transactionService.GetTransactionCategoryResponses(userId, detailed);
+
+            return GenerateResultFromServiceResult(transactionResult);
+        }
+
         private IActionResult GenerateResultFromServiceResult<TResultType>(
             ServiceObjectResult<TResultType> serviceObjectResult)
         {

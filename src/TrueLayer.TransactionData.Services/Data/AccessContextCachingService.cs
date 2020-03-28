@@ -56,13 +56,18 @@ namespace TrueLayer.TransactionData.Services.Data
         {
             var userAccessContexts = await _cache.Get<List<AccountAccessContext>>(accessContext.UserId);
 
+            if(userAccessContexts == null)
+                return ServiceResult.Succeeded();
+            
             var existingAccessContext = userAccessContexts.FirstOrDefault(x =>
                 x.UserId == accessContext.UserId &&
                 x.ProviderName == accessContext.ProviderName &&
                 x.CredentialsId == accessContext.CredentialsId);
+
+            if (existingAccessContext == null)
+                return ServiceResult.Succeeded();
             
-            if (existingAccessContext != null)
-                userAccessContexts.Remove(existingAccessContext);
+            userAccessContexts.Remove(existingAccessContext);
             
             await _cache.SetValueObject(accessContext.UserId, userAccessContexts);
             

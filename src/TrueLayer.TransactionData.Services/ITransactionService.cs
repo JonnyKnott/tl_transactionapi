@@ -8,5 +8,8 @@ namespace TrueLayer.TransactionData.Services
     public interface ITransactionService
     {
         Task<ServiceObjectResult<ICollection<Transaction>>> GetAllTransactions(string userId);
+
+        Task<ServiceObjectResult<TransactionCategoryResponse>>
+            GetTransactionCategoryResponses(string userId, bool detailed = false);
     }
 }

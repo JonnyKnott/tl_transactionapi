@@ -19,7 +19,7 @@ RUN dotnet build -c Release -o /app
 RUN dotnet publish -c Release -o /app
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 as base
-WORKDIR /app
+WORKDIR /ap
 COPY --from=publish /app .
 EXPOSE 80
 ENTRYPOINT ["dotnet", "TrueLayer.TransactionData.WebApi.dll"]

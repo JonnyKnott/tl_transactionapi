@@ -7,6 +7,7 @@ using TrueLayer.TransactionData.Models.Enums;
 using TrueLayer.TransactionData.Models.ServiceModels;
 using TrueLayer.TransactionData.Services.Auth;
 using TrueLayer.TransactionData.Services.Data;
+using TrueLayer.TransactionData.Services.Extensions;
 
 namespace TrueLayer.TransactionData.Services
 {
@@ -34,6 +35,7 @@ namespace TrueLayer.TransactionData.Services
 
         public async Task<ServiceObjectResult<ICollection<Transaction>>> GetAllTransactions(string userId)
         {
+            //Check cache
             var cachedTransactions = await _userDataCachingService.RetrieveTransactions(userId);
             
             if(!cachedTransactions.Success)
@@ -42,22 +44,71 @@ namespace TrueLayer.TransactionData.Services
             if(cachedTransactions.Result != null && cachedTransactions.Result.Any())
                 return ServiceObjectResult<ICollection<Transaction>>.Succeeded(cachedTransactions.Result);
 
-            var accessRefreshResult = await _authorizationService.AttemptRefreshAccountContexts(userId);
-            
-            if(!accessRefreshResult.Success)
-                return ServiceObjectResult<ICollection<Transaction>>.Failed(null, accessRefreshResult.Errors);
-            
-            var accessContextResult = await _accessCachingService.RetrieveAccessContexts(userId, new List<Scope>{ Scope.transactions, Scope.accounts });
+            //Obtain all valid access contexts 
+            var accessContextResult = await ObtainValidAccountContexts(userId);
 
-            if (!accessContextResult.Success)
+            if(!accessContextResult.Success)
                 return ServiceObjectResult<ICollection<Transaction>>.Failed(null, accessContextResult.Errors);
 
-            if (accessContextResult.Result == null)
-                return ServiceObjectResult<ICollection<Transaction>>.Failed(null, new List<string>{ ErrorMessages.UserNotFound });
+            var transactionsResult = await ObtainTransactionsForAccountContexts(accessContextResult.Result);
 
+            if(!transactionsResult.Success)
+                return ServiceObjectResult<ICollection<Transaction>>.Failed(null, transactionsResult.Errors);
+            
+            await _userDataCachingService.CacheTransactions(userId, transactionsResult.Result, TimeSpan.FromMinutes(10));
+
+            return ServiceObjectResult<ICollection<Transaction>>.Succeeded(transactionsResult.Result);
+        }
+
+        public async Task<ServiceObjectResult<TransactionCategoryResponse>>
+            GetTransactionCategoryResponses(string userId, bool detailed = false)
+        {
+            //Check cache
+            var cachedTransactions = await _userDataCachingService.RetrieveTransactions(userId);
+            
+            if(!cachedTransactions.Success)
+                return ServiceObjectResult<TransactionCategoryResponse>.Failed(null, cachedTransactions.Errors);
+            
+            if(cachedTransactions.Result != null && cachedTransactions.Result.Any())
+                return ServiceObjectResult<TransactionCategoryResponse>.Succeeded(CreateCategoryResponse(cachedTransactions.Result, detailed));
+            
+            //Obtain all valid access contexts 
+            var accessContextResult = await ObtainValidAccountContexts(userId);
+
+            if(!accessContextResult.Success)
+                return ServiceObjectResult<TransactionCategoryResponse>.Failed(null, accessContextResult.Errors);
+
+            var transactionsResult = await ObtainTransactionsForAccountContexts(accessContextResult.Result);
+
+            if(!transactionsResult.Success)
+                return ServiceObjectResult<TransactionCategoryResponse>.Failed(null, transactionsResult.Errors);
+            
+            await _userDataCachingService.CacheTransactions(userId, transactionsResult.Result, TimeSpan.FromMinutes(10));
+
+            return ServiceObjectResult<TransactionCategoryResponse>.Succeeded(CreateCategoryResponse(transactionsResult.Result, detailed));
+        }
+
+        private TransactionCategoryResponse CreateCategoryResponse(ICollection<Transaction> transactions, bool detailed)
+        {
+            var groupedDebitTransactions = transactions.Where(x => x.TransactionType == TransactionType.Debit).GroupBy(x => detailed ? x.TransactionClassifications.LastOrDefault() : x.TransactionClassifications.FirstOrDefault())
+                .Select(x => x.CreateCategorySummary()).ToList();
+            
+            var groupedCreditTransactions = transactions.Where(x => x.TransactionType == TransactionType.Credit).GroupBy(x => detailed ? x.TransactionClassifications.LastOrDefault() : x.TransactionClassifications.FirstOrDefault())
+                .Select(x => x.CreateCategorySummary()).ToList();
+
+            return new TransactionCategoryResponse
+            {
+                DebitTransactions = groupedDebitTransactions,
+                CreditTransactions = groupedCreditTransactions
+            };
+        } 
+
+        private async Task<ServiceObjectResult<ICollection<Transaction>>> ObtainTransactionsForAccountContexts(
+            ICollection<AccountAccessContext> accessContexts)
+        {
             var transactions = new List<Transaction>();
 
-            foreach (var accessContext in accessContextResult.Result)
+            foreach (var accessContext in accessContexts)
             {
                 var accountLookupResult = await _accountService.GetAccountsInContext(accessContext);
 
@@ -77,12 +128,28 @@ namespace TrueLayer.TransactionData.Services
                 }
             }
 
-            await _userDataCachingService.CacheTransactions(userId, transactions, TimeSpan.FromMinutes(10));
-
             return ServiceObjectResult<ICollection<Transaction>>.Succeeded(transactions);
         }
-        
-        
-        
+
+        private async Task<ServiceObjectResult<ICollection<AccountAccessContext>>> ObtainValidAccountContexts(string userId)
+        {
+            //Refresh access on all users accounts where required
+            var accessRefreshResult = await _authorizationService.AttemptRefreshAccountContexts(userId);
+            
+            if(!accessRefreshResult.Success)
+                return ServiceObjectResult<ICollection<AccountAccessContext>>.Failed(null, accessRefreshResult.Errors);
+            
+            //ObtainAccessContexts
+            var accessContextResult = await _accessCachingService.RetrieveAccessContexts(userId, new List<Scope>{ Scope.transactions, Scope.accounts });
+
+            if (!accessContextResult.Success)
+                return ServiceObjectResult<ICollection<AccountAccessContext>>.Failed(null, accessContextResult.Errors);
+
+            if (accessContextResult.Result == null)
+                return ServiceObjectResult<ICollection<AccountAccessContext>>.Failed(null, new List<string>{ ErrorMessages.UserNotFound });
+
+            return ServiceObjectResult<ICollection<AccountAccessContext>>.Succeeded(accessContextResult.Result);
+            
+        }
     }
 }

@@ -22,7 +22,6 @@ namespace TrueLayer.TransactionData.Models.ApiModels
 
         [JsonProperty("merchant_name")] 
         public string MerchantName { get; set; }
-
         public double Amount { get; set; }
 
         public string Currency { get; set; }

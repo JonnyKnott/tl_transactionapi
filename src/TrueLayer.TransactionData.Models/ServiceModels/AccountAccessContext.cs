@@ -6,6 +6,11 @@ namespace TrueLayer.TransactionData.Models.ServiceModels
 {
     public class AccountAccessContext
     {
+        public AccountAccessContext()
+        {
+            Scopes = new List<Scope>();
+        }
+        
         public string ProviderName { get; set; }
         public string CredentialsId { get; set; }
         public string UserId { get; set; }

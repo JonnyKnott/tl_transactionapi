@@ -38,7 +38,7 @@ namespace TrueLayer.TransactionData.Models.ServiceModels
             Errors = errors;
         }
 
-        public bool Success => Errors == null || !Errors.Any();
+        public bool Success => Errors == null;
         public ICollection<string> Errors { get; } 
         
         public static ServiceResult Succeeded()

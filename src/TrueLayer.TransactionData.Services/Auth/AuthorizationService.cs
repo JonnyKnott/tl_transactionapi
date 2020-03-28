@@ -33,7 +33,7 @@ namespace TrueLayer.TransactionData.Services.Auth
                 if (accessContext.RefreshToken == null)
                 {
                     await _accessContextCachingService.RemoveAccessContext(accessContext);
-                    return ServiceResult.Failed(new List<string> {ErrorMessages.AccountAccessExpired});
+                    continue;
                 }
 
                 var authResponseResult = await _trueLayerDataRequestExecutor.RefreshAccountAccess(accessContext);

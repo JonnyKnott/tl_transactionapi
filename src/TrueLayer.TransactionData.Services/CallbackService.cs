@@ -19,8 +19,6 @@ namespace TrueLayer.TransactionData.Services
         
         public async Task<ServiceResult> Process(string userId, CallbackRequest callbackData)
         {
-            await _userDataCachingService.ClearUserData(userId);
-            
             if (!string.IsNullOrEmpty(callbackData.Error))
                 return ServiceResult.Failed(new[] {ErrorMessages.CallbackStatedAccessDenied});
 
@@ -35,6 +33,8 @@ namespace TrueLayer.TransactionData.Services
             
             if(!exchangeCodeResult.Success)
                 return ServiceResult.Failed(exchangeCodeResult.Errors);
+            
+            await _userDataCachingService.ClearUserData(userId);
 
             return ServiceResult.Succeeded();
         }

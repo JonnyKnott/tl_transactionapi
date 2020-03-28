@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TrueLayer.TransactionData.Models.ApiModels.JsonConverters;
 using TrueLayer.TransactionData.Models.Configurations;
 using TrueLayer.TransactionData.Models.ServiceModels;
 using TrueLayer.TransactionData.Services;
@@ -33,8 +34,11 @@ namespace TrueLayer.TransactionData.WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             var connectionConfiguration = _configuration.GetSection("Connections").Get<ConnectionConfiguration>();
-            var trueLayerConfiguration = _configuration.GetSection("TrueLayer").Get<TrueLayerConfiguration>();
-            trueLayerConfiguration.ClientSecret = _configuration["TrueLayer:ClientSecret"];
+            var trueLayerRequestConfiguration = _configuration.GetSection("TrueLayer:Request").Get<TrueLayerRequestConfiguration>();
+            var trueLayerEndpointConfiguration = _configuration.GetSection("TrueLayer:Endpoints").Get<TrueLayerEndpointConfiguration>();
+            trueLayerRequestConfiguration.ClientSecret = _configuration["TrueLayer:ClientSecretValue"];
+
+            
             
             services
                 .AddScoped<ICallbackService, CallbackService>()
@@ -45,15 +49,16 @@ namespace TrueLayer.TransactionData.WebApi
                 .AddScoped<ITrueLayerDataRequestExecutor, TrueLayerDataRequestExecutor>()
                 .AddSingleton<IRequestTypeEndpointService, RequestTypeEndpointService>()
                 .AddSingleton<IUserDataCachingService, UserDataCachingService>()
-                .AddSingleton(trueLayerConfiguration);
+                .AddSingleton(trueLayerRequestConfiguration)
+                .AddSingleton(trueLayerEndpointConfiguration);
 
             services
                 .AddHttpClient(HttpClients.TrueLayerDataClientName,
-                    client => { client.BaseAddress = new Uri(trueLayerConfiguration.DataApiUri); });
+                    client => { client.BaseAddress = new Uri(trueLayerRequestConfiguration.DataApiUri); });
             
             services
                 .AddHttpClient(HttpClients.TrueLayerAuthClientName,
-                    client => { client.BaseAddress = new Uri(trueLayerConfiguration.AuthApiUri); });
+                    client => { client.BaseAddress = new Uri(trueLayerRequestConfiguration.AuthApiUri); });
             
             services.AddControllers();
 
@@ -65,10 +70,16 @@ namespace TrueLayer.TransactionData.WebApi
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                options.JsonSerializerOptions.Converters.Add(new TransactionAmountJsonConverter());
                 options.JsonSerializerOptions.IgnoreNullValues = true;
             });
 
             services.AddLogging(builder => { builder.AddConsole(); });
+            
+            if(connectionConfiguration.RedisEndpoint == null)
+                throw new Exception("redis endpoint not specified");
+            
+            Console.WriteLine(connectionConfiguration.RedisEndpoint);
             
             services.AddDistributedRedisCache(options =>
                 {
