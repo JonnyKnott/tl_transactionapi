@@ -1,7 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using TrueLayer.TransactionData.Models.ApiModels;
+using TrueLayer.TransactionData.Models.ServiceModels;
 using TrueLayer.TransactionData.Services;
 
 namespace TrueLayer.TransactionData.WebApi.Controllers
@@ -11,23 +14,45 @@ namespace TrueLayer.TransactionData.WebApi.Controllers
     public class CallbackController : ControllerBase
     {
         private readonly ICallbackService _service;
+        private readonly ILogger<CallbackController> _logger;
 
-        public CallbackController(ICallbackService service)
+        public CallbackController(ICallbackService service, ILogger<CallbackController> logger)
         {
             _service = service;
+            _logger = logger;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Post([FromQuery]CallbackRequest request)
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> Get(string userId, [FromQuery]CallbackRequest request)
         {
-            var result = await _service.Process(request);
-
-            if (!result.Success)
-            {
-                return BadRequest();
-            }
+            _logger.LogInformation($"Processing new account access for user {userId}");
             
-            return Ok();
+            var result = await _service.Process(userId, request);
+
+            return GenerateResultFromServiceResult(result);
+        }
+        
+        private IActionResult GenerateResultFromServiceResult(
+            ServiceResult serviceResult)
+        {
+
+            if (serviceResult.Success)
+                return Ok();
+
+            if (serviceResult.Errors.Contains(ErrorCodeStrings.InternalError))
+                return StatusCode(500, serviceResult.Errors);
+            
+            if (serviceResult.Errors.Contains(ErrorCodeStrings.BadRequestError))
+                return BadRequest(serviceResult.Errors);
+            
+            if (serviceResult.Errors.Contains(ErrorCodeStrings.NotFoundError))
+                return NotFound(serviceResult.Errors);
+
+            if (serviceResult.Errors.Any())
+                return StatusCode(500, serviceResult.Errors);
+
+            return StatusCode(500, "The request could not be processed due to an unknown reason.");
+
         }
         
     }

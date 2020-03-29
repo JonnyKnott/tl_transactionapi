@@ -61,6 +61,8 @@ BenchmarkDotNet.Artifacts/
 project.lock.json
 project.fragment.lock.json
 artifacts/
+src/TrueLayer.TransactionData.WebApi/appsettings.json
+src/TrueLayer.TransactionData.WebApi/appsettings.*.json
 
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt

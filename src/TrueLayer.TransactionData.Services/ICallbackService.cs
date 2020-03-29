@@ -6,6 +6,6 @@ namespace TrueLayer.TransactionData.Services
 {
     public interface ICallbackService
     {
-        Task<ServiceResult> Process(CallbackRequest callbackData);
+        Task<ServiceResult> Process(string userId, CallbackRequest callbackData);
     }
 }

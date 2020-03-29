@@ -1,26 +1,21 @@
 ﻿{
-  "iisSettings": {
-    "windowsAuthentication": false, 
-    "anonymousAuthentication": true, 
-    "iisExpress": {
-      "applicationUrl": "http://localhost:60867",
-      "sslPort": 44391
-    }
-  },
   "profiles": {
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
     "TrueLayer.TransactionData.WebApi": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Connections__RedisEndpoint": "127.0.0.1",
+        "TrueLayer__Request__DataApiUri": "https://api.truelayer.com",
+        "TrueLayer__Request__AuthApiUri": "https://auth.truelayer.com",
+        "TrueLayer__Request__AccountIdPlaceholder": "{accountId}",
+        "TrueLayer__Request__ClientId": "j0nn7st3stap1-fc947a",
+        "TrueLayer__Request__CallbackUrlBase": "http://localhost:5000/api/v1/callback/",
+        "TrueLayer__Endpoints__AccessTokenMetadataEndpoint": "data/v1/me",
+        "TrueLayer__Endpoints__GetAccountsEndpoint": "data/v1/accounts",
+        "TrueLayer__Endpoints__GetTransactionsEndpoint": "data/v1/accounts/{accountId}/transactions",
+        "TrueLayer__Endpoints__AuthEndpoint": "connect/token"
       }
     }
   }

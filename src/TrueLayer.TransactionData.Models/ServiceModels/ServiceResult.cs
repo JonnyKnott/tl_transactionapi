@@ -3,19 +3,43 @@ using System.Linq;
 
 namespace TrueLayer.TransactionData.Models.ServiceModels
 {
+    public class ServiceObjectResult<TResultType> : ServiceResult
+    {
+        protected ServiceObjectResult(TResultType result)
+        {
+            Result = result;
+        }
+
+        protected ServiceObjectResult(TResultType result, ICollection<string> errors) : base(errors)
+        {
+            Result = result;
+        }
+        
+        public TResultType Result { get; }
+
+        public static ServiceObjectResult<TResultType> Succeeded(TResultType result)
+        {
+            return new ServiceObjectResult<TResultType>(result);
+        }
+        
+        public static ServiceObjectResult<TResultType> Failed(TResultType result, ICollection<string> errors)
+        {
+            return new ServiceObjectResult<TResultType>(result, errors);
+        }
+    }
     public class ServiceResult
     {
-        private ServiceResult()
+        protected ServiceResult()
         {
             
         }
-        private ServiceResult(ICollection<string> errors)
+        protected ServiceResult(ICollection<string> errors)
         {
             Errors = errors;
         }
 
-        public bool Success => Errors == null || !Errors.Any();
-        public ICollection<string> Errors { get; private set; } 
+        public bool Success => Errors == null;
+        public ICollection<string> Errors { get; } 
         
         public static ServiceResult Succeeded()
         {

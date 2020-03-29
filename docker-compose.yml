@@ -7,6 +7,23 @@ services:
       dockerfile: src/TrueLayer.TransactionData.WebApi/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - Connections__RedisEndpoint=redis_image:6379
+      - TrueLayer__Request__DataApiUri=https://api.truelayer.com
+      - TrueLayer__Request__AuthApiUri=https://auth.truelayer.com
+      - TrueLayer__Request__AccountIdPlaceholder={accountId}
+      - TrueLayer__Request__ClientId=j0nn7st3stap1-fc947a
+      - TrueLayer__Request__CallbackUrlBase=http://localhost:9001/api/v1/callback/
+      - TrueLayer__Endpoints__AccessTokenMetadataEndpoint=data/v1/me
+      - TrueLayer__Endpoints__GetAccountsEndpoint=data/v1/accounts
+      - TrueLayer__Endpoints__GetTransactionsEndpoint=data/v1/accounts/{accountId}/transactions
+      - TrueLayer__Endpoints__AuthEndpoint=connect/token
     ports:
       - 9001:80
     restart: always
+    depends_on:
+      - redis_image
+  redis_image:
+    image: redis
+    container_name: redis_image
+    ports:
+      - "6379:6379"

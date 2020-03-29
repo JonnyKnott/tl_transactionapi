@@ -1,37 +1,51 @@
 ﻿using System;
 using System.Net;
+using Microsoft.AspNetCore.Http;
 using TrueLayer.TransactionData.WebApi.Test.Infrastructure;
+using TrueLayer.TransactionData.WebApi.Test.Services;
 using Xunit;
 
 namespace TrueLayer.TransactionData.WebApi.Test.Controllers
 {
-    public class CallbackControllerTests : IClassFixture<ServerFactory<Program>>
+    public class CallbackControllerTests : IClassFixture<ServerFactory>
     {
-        private readonly ServerFactory<Program> _factory;
+        private readonly ServerFactory _serverFactory;
 
-        private const string CallbackEndpointUri = "api/v1/Callback";
+        private const string CallbackEndpointUri = "api/v1/Callback/";
 
-        public CallbackControllerTests(ServerFactory<Program> factory)
+        public CallbackControllerTests(ServerFactory serverFactory)
         {
-            _factory = factory;
+            _serverFactory = serverFactory;
         }
 
         [Fact]
-        public async void Callback_Controller_Should_Accept_Correctly_Formed_Get()
+        public async void ShouldReturnOkForSuccessfulRequest()
         {
-            var code = Guid.NewGuid().ToString();
+            var client = _serverFactory.CreateClient();
 
-            var requestUri = BuildRequestUri(Guid.NewGuid().ToString(), new[] {"transactions"});
-
-            var client = _factory.CreateClient();
-            var response = await client.GetAsync(requestUri);
+            var result = await client.GetAsync($"{CallbackEndpointUri}{TestConstants.ValidUser}?code=1234");
             
-            Assert.True(response.IsSuccessStatusCode);
+            Assert.True(result.IsSuccessStatusCode);
         }
-
-        private string BuildRequestUri(string code, string[] scopes)
+        
+        [Fact]
+        public async void ShouldReturn500ForUnforseenErrorRequest()
         {
-            return $"{CallbackEndpointUri}?code={code}&scope={WebUtility.UrlEncode(string.Join(" ", scopes))}";
+            var client = _serverFactory.CreateClient();
+
+            var result = await client.GetAsync($"{CallbackEndpointUri}{TestConstants.ErrorUser}?code=1234");
+            
+            Assert.Equal(StatusCodes.Status500InternalServerError, (int)result.StatusCode);
+        }
+        
+        [Fact]
+        public async void ShouldReturn400ForBadRequest()
+        {
+            var client = _serverFactory.CreateClient();
+
+            var result = await client.GetAsync($"{CallbackEndpointUri}{TestConstants.BadRequestUser}?code=1234");
+            
+            Assert.Equal(StatusCodes.Status400BadRequest, (int)result.StatusCode);
         }
     }
 }

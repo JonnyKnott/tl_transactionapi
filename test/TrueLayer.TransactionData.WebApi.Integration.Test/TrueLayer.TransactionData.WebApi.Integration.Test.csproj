@@ -20,4 +20,10 @@
       <ProjectReference Include="..\..\src\TrueLayer.TransactionData.WebApi\TrueLayer.TransactionData.WebApi.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="appsettings.testing.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>
