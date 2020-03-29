@@ -157,7 +157,7 @@ namespace TrueLayer.TransactionData.Services.Data
                 case HttpStatusCode.Unauthorized:
                     return new[]
                     {
-                        $"The bearer token is either invalid or expired"
+                        ErrorMessages.AccountAccessExpired
                     };
                 case HttpStatusCode.Forbidden:
                     return new[]

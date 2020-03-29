@@ -64,6 +64,7 @@ namespace TrueLayer.TransactionData.Services.Auth
 
             accessContext.AccessToken = exchangeCodeResult.Result.AccessToken;
             accessContext.RefreshToken = exchangeCodeResult.Result.RefreshToken;
+            accessContext.AccessTokenExpiry = DateTime.UtcNow.AddSeconds(exchangeCodeResult.Result.ExpiresIn);
             
             var saveContextResult = await ObtainMetadataAndUpdateCache(accessContext);
             
@@ -86,7 +87,6 @@ namespace TrueLayer.TransactionData.Services.Auth
 
             var accessMetadata = accessMetadataResult.Result.Results.Single();
             
-            accessContext.AccessTokenExpiry = accessMetadata.ConsentExpiresAt;
             accessContext.ProviderName = accessMetadata.Provider.DisplayName;
             accessContext.CredentialsId = accessMetadata.CredentialsId;
 

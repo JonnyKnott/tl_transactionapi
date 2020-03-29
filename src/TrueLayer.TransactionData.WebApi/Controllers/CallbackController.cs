@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TrueLayer.TransactionData.Models.ApiModels;
+using TrueLayer.TransactionData.Models.ServiceModels;
 using TrueLayer.TransactionData.Services;
 
 namespace TrueLayer.TransactionData.WebApi.Controllers
@@ -27,12 +29,30 @@ namespace TrueLayer.TransactionData.WebApi.Controllers
             
             var result = await _service.Process(userId, request);
 
-            if (!result.Success)
-            {
-                return BadRequest();
-            }
+            return GenerateResultFromServiceResult(result);
+        }
+        
+        private IActionResult GenerateResultFromServiceResult(
+            ServiceResult serviceResult)
+        {
+
+            if (serviceResult.Success)
+                return Ok();
+
+            if (serviceResult.Errors.Contains(ErrorCodeStrings.InternalError))
+                return StatusCode(500, serviceResult.Errors);
             
-            return Ok();
+            if (serviceResult.Errors.Contains(ErrorCodeStrings.BadRequestError))
+                return BadRequest(serviceResult.Errors);
+            
+            if (serviceResult.Errors.Contains(ErrorCodeStrings.NotFoundError))
+                return NotFound(serviceResult.Errors);
+
+            if (serviceResult.Errors.Any())
+                return StatusCode(500, serviceResult.Errors);
+
+            return StatusCode(500, "The request could not be processed due to an unknown reason.");
+
         }
         
     }

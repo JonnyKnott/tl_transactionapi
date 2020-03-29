@@ -39,8 +39,7 @@ namespace TrueLayer.TransactionData.Services.Data
 
             var existingAccessContext = userAccessContexts.FirstOrDefault(x =>
                 x.UserId == accessContext.UserId &&
-                x.ProviderName == accessContext.ProviderName &&
-                x.CredentialsId == accessContext.CredentialsId);
+                x.ProviderName == accessContext.ProviderName);
 
             if (existingAccessContext != null)
                 userAccessContexts.Remove(existingAccessContext);
@@ -61,8 +60,7 @@ namespace TrueLayer.TransactionData.Services.Data
             
             var existingAccessContext = userAccessContexts.FirstOrDefault(x =>
                 x.UserId == accessContext.UserId &&
-                x.ProviderName == accessContext.ProviderName &&
-                x.CredentialsId == accessContext.CredentialsId);
+                x.ProviderName == accessContext.ProviderName);
 
             if (existingAccessContext == null)
                 return ServiceResult.Succeeded();

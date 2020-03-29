@@ -153,23 +153,12 @@ namespace TrueLayer.TransactionData.Services.Test.Data
 
             var result2 = await _accessContextCachingService.RemoveAccessContext(newProvider);
 
-            var newCredentials = new AccountAccessContext
-            {
-                CredentialsId = Guid.NewGuid().ToString(),
-                UserId = accessContext.UserId,
-                ProviderName = accessContext.ProviderName
-            };
-
-            var result3 = await _accessContextCachingService.RemoveAccessContext(newCredentials);
-            
             Assert.True(result1.Success);
             Assert.True(result2.Success);
-            Assert.True(result3.Success);
             Assert.Single(_mockCacheItems[userId]);
             Assert.Equal(userId, _mockCacheItems[userId].Single().UserId);
-            Assert.Equal(credentialsId, _mockCacheItems[userId].Single().CredentialsId);
             Assert.Equal(providerName, _mockCacheItems[userId].Single().ProviderName);
-            _mockCache.Verify(x=> x.GetAsync(userId, default), Times.Exactly(2));
+            _mockCache.Verify(x=> x.GetAsync(userId, default), Times.Exactly(1));
             _mockCache.Verify(x=> x.SetAsync(userId, It.IsAny<byte[]>(), It.IsAny<DistributedCacheEntryOptions>(),default), Times.Never);
         }
 

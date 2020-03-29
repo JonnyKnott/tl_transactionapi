@@ -22,10 +22,12 @@ namespace TrueLayer.TransactionData.Services
             var accountsInContextResult = await _requestExecutor.GetAccounts(accessContext.AccessToken);
 
             if (!accountsInContextResult.Success || accountsInContextResult.Result.Status != "Succeeded")
+            {
                 return ServiceObjectResult<ICollection<Account>>.Failed(null,
                     accountsInContextResult.Errors ?? new List<string>
                         {"An error occurred fetching account information"});
-            
+            }
+
             return ServiceObjectResult<ICollection<Account>>.Succeeded(accountsInContextResult.Result.Results);
         }
     }

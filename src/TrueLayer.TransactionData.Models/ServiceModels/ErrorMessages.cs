@@ -1,5 +1,13 @@
-﻿namespace TrueLayer.TransactionData.Models.ServiceModels
+﻿using System.Net;
+
+namespace TrueLayer.TransactionData.Models.ServiceModels
 {
+    public static class ErrorCodeStrings
+    {
+        public static string InternalError = HttpStatusCode.InternalServerError.ToString();
+        public static string BadRequestError = HttpStatusCode.BadRequest.ToString();
+        public static string NotFoundError = HttpStatusCode.NotFound.ToString();
+    }
     public static class ErrorMessages
     {
         public const string CallbackStatedAccessDenied = "The user did not grant the requested permissions to access data api";

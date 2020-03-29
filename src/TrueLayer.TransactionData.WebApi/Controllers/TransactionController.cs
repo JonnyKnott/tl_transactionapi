@@ -54,10 +54,19 @@ namespace TrueLayer.TransactionData.WebApi.Controllers
             if (serviceObjectResult.Success)
                 return Ok(serviceObjectResult.Result);
 
-            if (serviceObjectResult.Errors.Any())
+            if (serviceObjectResult.Errors.Contains(ErrorCodeStrings.InternalError))
+                return StatusCode(500, serviceObjectResult.Errors);
+            
+            if (serviceObjectResult.Errors.Contains(ErrorCodeStrings.BadRequestError))
                 return BadRequest(serviceObjectResult.Errors);
+            
+            if (serviceObjectResult.Errors.Contains(ErrorCodeStrings.NotFoundError))
+                return NotFound(serviceObjectResult.Errors);
 
-            return StatusCode(500);
+            if (serviceObjectResult.Errors.Any())
+                return StatusCode(500, serviceObjectResult.Errors);
+
+            return StatusCode(500, "The request could not be processed due to an unknown reason.");
 
         }
 

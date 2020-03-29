@@ -1,19 +1,17 @@
-﻿using System;
-using System.Net;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using TrueLayer.TransactionData.WebApi.Test.Infrastructure;
 using TrueLayer.TransactionData.WebApi.Test.Services;
 using Xunit;
 
 namespace TrueLayer.TransactionData.WebApi.Test.Controllers
 {
-    public class CallbackControllerTests : IClassFixture<ServerFactory>
+    public class TransactionControllerTests : IClassFixture<ServerFactory>
     {
         private readonly ServerFactory _serverFactory;
 
-        private const string CallbackEndpointUri = "api/v1/Callback/";
+        private const string TransactionEndpointUri = "api/v1/Transaction/";
 
-        public CallbackControllerTests(ServerFactory serverFactory)
+        public TransactionControllerTests(ServerFactory serverFactory)
         {
             _serverFactory = serverFactory;
         }
@@ -23,7 +21,7 @@ namespace TrueLayer.TransactionData.WebApi.Test.Controllers
         {
             var client = _serverFactory.CreateClient();
 
-            var result = await client.GetAsync($"{CallbackEndpointUri}{TestConstants.ValidUser}?code=1234");
+            var result = await client.GetAsync($"{TransactionEndpointUri}{TestConstants.ValidUser}");
             
             Assert.True(result.IsSuccessStatusCode);
         }
@@ -33,7 +31,7 @@ namespace TrueLayer.TransactionData.WebApi.Test.Controllers
         {
             var client = _serverFactory.CreateClient();
 
-            var result = await client.GetAsync($"{CallbackEndpointUri}{TestConstants.ErrorUser}?code=1234");
+            var result = await client.GetAsync($"{TransactionEndpointUri}{TestConstants.ErrorUser}");
             
             Assert.Equal(StatusCodes.Status500InternalServerError, (int)result.StatusCode);
         }
@@ -43,9 +41,20 @@ namespace TrueLayer.TransactionData.WebApi.Test.Controllers
         {
             var client = _serverFactory.CreateClient();
 
-            var result = await client.GetAsync($"{CallbackEndpointUri}{TestConstants.BadRequestUser}?code=1234");
+            var result = await client.GetAsync($"{TransactionEndpointUri}{TestConstants.BadRequestUser}");
             
             Assert.Equal(StatusCodes.Status400BadRequest, (int)result.StatusCode);
         }
+        
+        [Fact]
+        public async void ShouldReturn404ForNotFound()
+        {
+            var client = _serverFactory.CreateClient();
+
+            var result = await client.GetAsync($"{TransactionEndpointUri}{TestConstants.NotFoundUser}");
+            
+            Assert.Equal(StatusCodes.Status404NotFound, (int)result.StatusCode);
+        }
     }
+    
 }

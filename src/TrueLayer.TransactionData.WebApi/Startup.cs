@@ -33,12 +33,9 @@ namespace TrueLayer.TransactionData.WebApi
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            var connectionConfiguration = _configuration.GetSection("Connections").Get<ConnectionConfiguration>();
-            var trueLayerRequestConfiguration = _configuration.GetSection("TrueLayer:Request").Get<TrueLayerRequestConfiguration>();
-            var trueLayerEndpointConfiguration = _configuration.GetSection("TrueLayer:Endpoints").Get<TrueLayerEndpointConfiguration>();
-            trueLayerRequestConfiguration.ClientSecret = _configuration["TrueLayer:ClientSecretValue"];
-
-            
+            var connectionConfiguration = _configuration.GetSection("Connections").Get<ConnectionConfiguration>() ?? new ConnectionConfiguration();
+            var trueLayerRequestConfiguration = _configuration.GetSection("TrueLayer:Request").Get<TrueLayerRequestConfiguration>() ?? new TrueLayerRequestConfiguration();
+            var trueLayerEndpointConfiguration = _configuration.GetSection("TrueLayer:Endpoints").Get<TrueLayerEndpointConfiguration>() ?? new TrueLayerEndpointConfiguration();
             
             services
                 .AddScoped<ICallbackService, CallbackService>()
@@ -75,10 +72,7 @@ namespace TrueLayer.TransactionData.WebApi
             });
 
             services.AddLogging(builder => { builder.AddConsole(); });
-            
-            if(connectionConfiguration.RedisEndpoint == null)
-                throw new Exception("redis endpoint not specified");
-            
+
             Console.WriteLine(connectionConfiguration.RedisEndpoint);
             
             services.AddDistributedRedisCache(options =>
