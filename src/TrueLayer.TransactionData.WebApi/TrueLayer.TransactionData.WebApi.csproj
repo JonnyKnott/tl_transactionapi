@@ -14,9 +14,6 @@
     <ProjectReference Include="..\TrueLayer.TransactionData.Services\TrueLayer.TransactionData.Services.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Extensions" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Update="appsettings.Development.json">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
