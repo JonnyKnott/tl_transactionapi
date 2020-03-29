@@ -1,0 +1,8 @@
+version: "3.7"
+
+services:
+  redis_image:
+    image: redis
+    container_name: redis_image
+    ports:
+      - "6379:6379"

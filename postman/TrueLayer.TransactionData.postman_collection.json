@@ -1,0 +1,95 @@
+{
+	"info": {
+		"_postman_id": "b21283f1-12aa-4eec-8aa6-7bdaeaf7c58b",
+		"name": "TrueLayer.TransactionData",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{request_url}}/ping",
+					"host": [
+						"{{request_url}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Transactions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{request_url}}/api/v1/transaction/{{user_id}}",
+					"host": [
+						"{{request_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"transaction",
+						"{{user_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Transaction Summary",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{request_url}}/api/v1/transaction/{{user_id}}/summary",
+					"host": [
+						"{{request_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"transaction",
+						"{{user_id}}",
+						"summary"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Transaction Summary (Detailed)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{request_url}}/api/v1/transaction/{{user_id}}/summary?detailed=true",
+					"host": [
+						"{{request_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"transaction",
+						"{{user_id}}",
+						"summary"
+					],
+					"query": [
+						{
+							"key": "detailed",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
